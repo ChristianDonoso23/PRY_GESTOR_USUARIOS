@@ -12,16 +12,25 @@ export class UserApp extends LitElement {
         this.selectedUser = null;
     }
 
+    handleReload() {
+        this.shadowRoot
+        .getElementById("userList")
+        .loadUsers();
+
+        this.selectedUser = null;
+    }
+
     render() {
         return html`
         <h2>Gestión de Usuarios</h2>
 
         <user-form
             .user=${this.selectedUser}
-            @saved=${() => (this.selectedUser = null)}>
+            @user-saved=${this.handleReload}>
         </user-form>
 
         <user-list
+            id="userList"
             @edit-user=${e => this.selectedUser = e.detail}>
         </user-list>
         `;

@@ -51,11 +51,19 @@ export class UserList extends LitElement {
                 <td>${user.rol}</td>
                 <td>${user.estado}</td>
                 <td>
-                <button @click=${() => this.dispatchEvent(
-                    new CustomEvent("edit-user", { detail: user, bubbles: true, composed: true })
-                )}>Editar</button>
+                <button @click=${() =>
+                    this.dispatchEvent(new CustomEvent("edit-user", {
+                    detail: user,
+                    bubbles: true,
+                    composed: true
+                    }))
+                }>
+                    Editar
+                </button>
 
-                <button @click=${() => this.deleteUser(user.id)}>Eliminar</button>
+                <button @click=${() => this.deleteUser(user.id)}>
+                    Eliminar
+                </button>
                 </td>
             </tr>
             `)}

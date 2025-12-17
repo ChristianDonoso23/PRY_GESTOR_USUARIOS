@@ -32,7 +32,12 @@ export class UserForm extends LitElement {
         await UserService.create(data);
         }
 
-        this.dispatchEvent(new CustomEvent("saved", { bubbles: true, composed: true }));
+        // 🔑 EVENTO CORRECTO
+        this.dispatchEvent(new CustomEvent("user-saved", {
+        bubbles: true,
+        composed: true
+        }));
+
         this.resetForm();
     }
 
@@ -46,16 +51,19 @@ export class UserForm extends LitElement {
         <form @submit=${this.handleSubmit}>
             <h3>${this.user ? "Editar Usuario" : "Nuevo Usuario"}</h3>
 
-            <input id="nombre" placeholder="Nombre" .value=${this.user?.nombre ?? ""} required />
-            <input id="correo" placeholder="Correo" .value=${this.user?.correo ?? ""} required />
+            <input id="nombre" placeholder="Nombre"
+            .value=${this.user?.nombre ?? ""} required />
 
-            <select id="rol">
+            <input id="correo" placeholder="Correo"
+            .value=${this.user?.correo ?? ""} required />
+
+            <select id="rol" .value=${this.user?.rol ?? "Usuario"}>
             <option value="Usuario">Usuario</option>
             <option value="Soporte">Soporte</option>
             <option value="Admin">Admin</option>
             </select>
 
-            <select id="estado">
+            <select id="estado" .value=${this.user?.estado ?? "Activo"}>
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
             </select>
