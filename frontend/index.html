@@ -56,7 +56,8 @@
         }
 
         .app-container {
-            width: 90%;
+            width: 100%;
+            max-width: 1400px; /* 🔑 MISMO QUE user-app */
             background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
             padding: 20px;
@@ -64,7 +65,9 @@
             color: #333;
             min-height: 500px;
             display: none;
+            overflow-x: hidden; /* 🔑 */
         }
+
     </style>
 </head>
 <body>

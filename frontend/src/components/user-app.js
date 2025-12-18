@@ -47,10 +47,15 @@ export class UserApp extends LitElement {
 
         .content-grid {
             display: grid;
-            grid-template-columns: minmax(360px, 420px) 1fr;
+            grid-template-columns: minmax(360px, 420px) minmax(0, 1fr);
             gap: 3rem;
             align-items: stretch;
+            width: 100%;
+            overflow: hidden;
+            padding: 0 1.5rem;
         }
+
+
 
 
 
