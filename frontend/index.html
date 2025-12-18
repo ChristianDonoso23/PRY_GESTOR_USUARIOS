@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Usuarios</title>
+    <title>Gestión de Soporte</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
     <style>
         body {
             margin: 0;
@@ -11,11 +14,99 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #051650 0%, #00072d 100%);
             min-height: 100vh;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Estilos para la navegación (Tabs) */
+        .nav-container {
+            margin-top: 30px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: #ccc;
+            padding: 10px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .nav-btn:hover {
+            color: white;
+        }
+
+        .nav-btn.active {
+            background-color: #00d2ff;
+            color: #00072d;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+        }
+
+        /* Contenedor principal de la app */
+        .app-container {
+            width: 90%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            color: #333; /* Texto oscuro dentro de la tarjeta para que se lea bien */
+            min-height: 500px;
         }
     </style>
 </head>
 <body>
-    <user-app></user-app>
+
+    <div class="nav-container">
+        <button class="nav-btn active" onclick="showModule('users')" id="btn-users">
+            <i class="bi bi-people-fill"></i> Usuarios
+        </button>
+        <button class="nav-btn" onclick="showModule('tickets')" id="btn-tickets">
+            <i class="bi bi-ticket-detailed-fill"></i> Tickets
+        </button>
+    </div>
+
+    <div class="app-container">
+        
+        <div id="users-view">
+            <user-app></user-app>
+        </div>
+
+        <div id="tickets-view" style="display: none;">
+            <ticket-app></ticket-app>
+        </div>
+
+    </div>
+
+    <script>
+        function showModule(moduleName) {
+            // 1. Ocultar ambas vistas
+            document.getElementById('users-view').style.display = 'none';
+            document.getElementById('tickets-view').style.display = 'none';
+
+            // 2. Quitar clase activa de los botones
+            document.getElementById('btn-users').classList.remove('active');
+            document.getElementById('btn-tickets').classList.remove('active');
+
+            // 3. Mostrar la vista seleccionada y activar botón
+            document.getElementById(moduleName + '-view').style.display = 'block';
+            document.getElementById('btn-' + moduleName).classList.add('active');
+        }
+    </script>
+
     <script type="module" src="/src/components/user-app.js"></script>
+    <script type="module" src="/src/components/ticket-app.js"></script>
+
 </body>
 </html>
