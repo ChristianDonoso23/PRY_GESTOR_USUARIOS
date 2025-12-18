@@ -1,3 +1,4 @@
+// user-list.js
 import { LitElement, html, css } from "lit";
 import { UserService } from "../services/user.service.js";
 
@@ -19,6 +20,7 @@ export class UserList extends LitElement {
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             width: 100%;
             overflow: hidden;
+            box-sizing: border-box;
         }
 
         .card-header-custom {
@@ -32,19 +34,21 @@ export class UserList extends LitElement {
             gap: 12px;
         }
 
-        /* 🔑 AQUÍ ESTABA EL PROBLEMA */
-        .card-body {
-            padding: 1.5rem 1.75rem;
-        }
-
         .table-wrapper {
             width: 100%;
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 1.75rem;     /* ← CLAVE: mismo padding lateral que el formulario */
+            box-sizing: border-box;
+        }
+
+        .card-body-custom {
+            padding: 2rem 0;        /* ← Solo padding vertical, el horizontal lo maneja el wrapper */
+            padding-bottom: 2rem;
         }
 
         table {
             width: 100%;
-            min-width: 900px;
             border-collapse: collapse;
         }
 
@@ -54,26 +58,27 @@ export class UserList extends LitElement {
         }
 
         thead th {
-            padding: 1rem 1.25rem;
+            padding: 1rem 0.75rem;     /* Reducimos un poco el padding horizontal */
             font-size: 0.85rem;
             text-transform: uppercase;
             white-space: nowrap;
             text-align: left;
         }
 
-        tbody tr {
-            border-bottom: 1px solid #e0e1dd;
-        }
-
         tbody td {
-            padding: 1rem 1.25rem;
+            padding: 1rem 0.75rem;     /* Igual que el header */
             font-size: 0.9rem;
             white-space: nowrap;
         }
 
+        /* Mejoramos el espacio en columnas específicas si es necesario */
+        thead th:nth-child(1), tbody td:nth-child(1) { min-width: 140px; } /* Nombre */
+        thead th:nth-child(2), tbody td:nth-child(2) { min-width: 180px; } /* Correo */
+        thead th:nth-child(5), tbody td:nth-child(5) { text-align: center; }
+
         .badge-rol,
         .badge-estado {
-            padding: 0.45rem 1rem;
+            padding: 0.45rem 0.9rem;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
@@ -152,16 +157,16 @@ export class UserList extends LitElement {
                     📋 Listado de Usuarios
                 </div>
 
-                <div class="card-body">
+                <div class="card-body-custom">
                     <div class="table-wrapper">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Nombre</th>
-                                    <th>Correo</th>
-                                    <th>Rol</th>
-                                    <th>Estado</th>
-                                    <th style="text-align:center">Acciones</th>
+                                    <th>NOMBRE</th>
+                                    <th>CORREO</th>
+                                    <th>ROL</th>
+                                    <th>ESTADO</th>
+                                    <th style="text-align:center">ACCIONES</th>
                                 </tr>
                             </thead>
                             <tbody>
