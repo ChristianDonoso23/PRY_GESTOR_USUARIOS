@@ -1,49 +1,77 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html } from 'lit';
+import { UserService } from '../services/user.service.js';
 import './ticket-list.js';
 import './ticket-form.js';
 
 export class TicketApp extends LitElement {
   
   static properties = {
-    view: { type: String },      // 'list' | 'form'
-    selectedTicket: { type: Object }
+    view: { type: String },
+    selectedTicket: { type: Object },
+    currentUser: { type: Object }, // Usuario "logueado" actualmente
+    usersForLogin: { state: true } // Lista para el select de simulación
   };
 
   constructor() {
     super();
-    this.view = 'list';          // Vista por defecto
+    this.view = 'list';
     this.selectedTicket = null;
+    this.currentUser = null; 
+    this.usersForLogin = [];
   }
 
-  // --- Manejadores de Eventos ---
+  async connectedCallback() {
+      super.connectedCallback();
+      // Cargamos usuarios para poder simular el login
+      this.usersForLogin = await UserService.getAll();
+      
+      // Auto-loguear como el primer admin que encuentre o el primer usuario
+      if(this.usersForLogin.length > 0) {
+          this.currentUser = this.usersForLogin.find(u => u.rol === 'Admin') || this.usersForLogin[0];
+      }
+  }
 
-  // Cuando el usuario hace click en "Nuevo Ticket" en la lista
   _handleNewTicket() {
-    this.selectedTicket = null; // Limpiamos selección
-    this.view = 'form';         // Cambiamos vista
-  }
-
-  // Cuando el usuario hace click en "Editar" en la lista
-  _handleEditTicket(e) {
-    this.selectedTicket = e.detail; // Guardamos el ticket recibido
+    this.selectedTicket = null;
     this.view = 'form';
   }
 
-  // Cuando el formulario termina (Guardar o Cancelar)
+  _handleEditTicket(e) {
+    this.selectedTicket = e.detail;
+    this.view = 'form';
+  }
+
   _handleReturnToList() {
     this.view = 'list';
     this.selectedTicket = null;
-    
-    // Pequeño truco: Esperar a que se renderice la lista y pedirle que recargue datos
     setTimeout(() => {
-      const listComponent = this.shadowRoot.querySelector('ticket-list');
-      if (listComponent) listComponent.loadTickets();
-    }, 0);
+      const list = this.shadowRoot.querySelector('ticket-list');
+      if (list) list.loadTickets();
+    }, 100);
+  }
+
+  // Simular cambio de usuario
+  _handleLoginChange(e) {
+      const userId = e.target.value;
+      this.currentUser = this.usersForLogin.find(u => u.id == userId);
+      this.requestUpdate(); // Forzar re-render
   }
 
   render() {
-    // Renderizado condicional: ¿Qué vista mostramos?
     return html`
+      <link rel="stylesheet" href="/src/vendor/bootstrap/css/bootstrap.min.css">
+      
+      <div class="alert alert-dark d-flex justify-content-between align-items-center m-3 p-2">
+          <span><strong>Simulación de Sesión:</strong> Actuando como:</span>
+          <select class="form-select w-50" @change="${this._handleLoginChange}">
+              ${this.usersForLogin.map(u => html`
+                  <option value="${u.id}" ?selected="${this.currentUser?.id === u.id}">
+                      ${u.nombre} (${u.rol})
+                  </option>
+              `)}
+          </select>
+      </div>
+
       <div>
         ${this.view === 'list' 
           ? html`
@@ -54,8 +82,8 @@ export class TicketApp extends LitElement {
             `
           : html`
               <ticket-form
-                .ticketData="${this.selectedTicket ? {...this.selectedTicket} : null}"
-                .ticketId="${this.selectedTicket?.id}"
+                .ticket="${this.selectedTicket}"
+                .currentUser="${this.currentUser}"
                 @ticket-saved="${this._handleReturnToList}"
                 @cancel="${this._handleReturnToList}">
               </ticket-form>
