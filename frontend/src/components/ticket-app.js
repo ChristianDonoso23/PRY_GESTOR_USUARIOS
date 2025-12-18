@@ -76,9 +76,10 @@ export class TicketApp extends LitElement {
         ${this.view === 'list' 
           ? html`
               <ticket-list
-                @new-ticket="${this._handleNewTicket}"
-                @edit-ticket="${this._handleEditTicket}">
-              </ticket-list>
+                .currentUser="${this.currentUser}" 
+                 @new-ticket="${this._handleNewTicket}"
+                 @edit-ticket="${this._handleEditTicket}">
+              </ticket-list>          
             `
           : html`
               <ticket-form

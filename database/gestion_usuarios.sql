@@ -9,10 +9,8 @@ USE gestion_usuarios;
 -- =====================================================
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
-
     nombre VARCHAR(100) NOT NULL,
     correo VARCHAR(100) NOT NULL UNIQUE,
-
     -- Contraseña en HASH (bcrypt)
     password VARCHAR(255) NOT NULL,
 
@@ -30,22 +28,16 @@ CREATE TABLE usuarios (
 -- =====================================================
 CREATE TABLE tickets (
     id INT AUTO_INCREMENT PRIMARY KEY,
-
     titulo VARCHAR(150) NOT NULL,
     descripcion TEXT NOT NULL,
-
     estado ENUM('Abierto','En Proceso','Cerrado')
         NOT NULL DEFAULT 'Abierto',
-
     prioridad ENUM('Baja','Media','Alta')
         NOT NULL DEFAULT 'Media',
-
     -- Usuario solicitante
     creado_por INT NOT NULL,
-
     -- Usuario soporte asignado (NULL al inicio)
     asignado_a INT NULL,
-
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_ticket_creador
