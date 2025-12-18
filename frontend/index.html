@@ -29,6 +29,9 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             display: none;
+            display: flex;              /* ← Asegura flex */
+            align-items: center;        /* ← Alinea verticalmente */
+            gap: 10px;                  /* ← Espacio entre botones */
         }
 
         .nav-btn {
@@ -53,6 +56,28 @@
             margin-left: 20px;
             color: #ffb3b3;
             cursor: pointer;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: #ffb3b3;
+            margin-left: auto; /* ← CLAVE: empuja el botón al extremo derecho */
+            padding: 10px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background-color: #dc2626;
+            color: white;
+            box-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
         }
 
         .app-container {
@@ -83,9 +108,9 @@
         <button class="nav-btn" id="btn-tickets" onclick="showModule('tickets')">
             <i class="bi bi-ticket-detailed-fill"></i> Tickets
         </button>
-        <span class="logout" onclick="logout()">
+        <button class="nav-btn logout-btn" onclick="logout()">
             <i class="bi bi-box-arrow-right"></i> Salir
-        </span>
+        </button>
     </div>
 
     <!-- APP -->
