@@ -1,6 +1,7 @@
 import { LitElement, html, css } from "lit";
 import "./ticket-form.js";
 import "./ticket-list.js";
+import "./custom-alert.js"; // Importamos la alerta
 
 export class TicketApp extends LitElement {
     static properties = {
@@ -15,6 +16,14 @@ export class TicketApp extends LitElement {
     connectedCallback() {
         super.connectedCallback();
         this.rol = this.getRolFromToken();
+        // Escuchamos el evento 'notify' que burbujea desde los hijos (form o list)
+        this.addEventListener('notify', this.handleNotification);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        // Limpiamos el evento al destruir el componente
+        this.removeEventListener('notify', this.handleNotification);
     }
 
     getRolFromToken() {
@@ -30,6 +39,15 @@ export class TicketApp extends LitElement {
     reloadTickets() {
         const list = this.shadowRoot.getElementById("ticketList");
         if (list) list.load();
+    }
+
+    // Manejador para activar la alerta global
+    handleNotification(e) {
+        const alertComponent = this.shadowRoot.querySelector('custom-alert');
+        if (alertComponent) {
+            // Asumiendo que el evento envía { msg, type } en detail
+            alertComponent.notify(e.detail.msg, e.detail.type);
+        }
     }
 
     static styles = css`
@@ -79,6 +97,8 @@ export class TicketApp extends LitElement {
         const gridClass = isSoporte ? "one-col" : "two-cols";
 
         return html`
+            <custom-alert></custom-alert>
+
             <div class="main-header">
                 <h1>🎫 Gestión de Tickets</h1>
                 <p>Sistema de soporte y seguimiento</p>
@@ -86,7 +106,7 @@ export class TicketApp extends LitElement {
 
             <div class="content-grid ${gridClass}">
                 ${!isSoporte
-                    ? html`<ticket-form @ticket-updated=${this.reloadTickets}></ticket-form>`
+                    ? html`<ticket-form @ticket-saved=${this.reloadTickets}></ticket-form>`
                     : null}
 
                 <ticket-list id="ticketList"></ticket-list>

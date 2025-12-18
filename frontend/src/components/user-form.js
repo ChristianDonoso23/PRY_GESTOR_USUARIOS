@@ -73,6 +73,22 @@ export class UserForm extends LitElement {
             box-shadow: 0 0 0 4px rgba(65, 90, 119, 0.1);
         }
 
+        /* --- NUEVOS ESTILOS PARA VALIDACIÓN (UX) --- */
+        .input-error {
+            border-color: #e74c3c !important;
+            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1) !important;
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        /* ------------------------------------------- */
+
         .btn-group {
             display: flex;
             gap: 0.75rem;
@@ -126,39 +142,96 @@ export class UserForm extends LitElement {
         this.user = null;
     }
 
+    // Helper para disparar notificaciones al componente padre
+    dispatchNotify(msg, type) {
+        this.dispatchEvent(new CustomEvent('notify', {
+            detail: { msg, type },
+            bubbles: true,
+            composed: true
+        }));
+    }
+
+    // Lógica de validación visual
+    validateInputs() {
+        // Selecciona todos los inputs que tengan el atributo 'required'
+        const inputs = this.shadowRoot.querySelectorAll('[required]');
+        let isValid = true;
+        let firstError = null;
+
+        inputs.forEach(input => {
+            // Limpiar error previo
+            input.classList.remove('input-error');
+
+            // Si está vacío
+            if (!input.value.trim()) {
+                input.classList.add('input-error');
+                isValid = false;
+                if (!firstError) firstError = input;
+
+                // UX: Quitar el error apenas el usuario empiece a escribir
+                input.addEventListener('input', () => {
+                    input.classList.remove('input-error');
+                }, { once: true });
+            }
+        });
+
+        if (!isValid) {
+            this.dispatchNotify('Por favor, completa los campos obligatorios resaltados.', 'warning');
+            if (firstError) firstError.focus();
+        }
+
+        return isValid;
+    }
+
     async handleSubmit(e) {
-    e.preventDefault();
+        e.preventDefault();
 
-    const data = {
-        nombre: this.shadowRoot.getElementById("nombre").value,
-        correo: this.shadowRoot.getElementById("correo").value,
-        rol: this.shadowRoot.getElementById("rol").value,
-        estado: this.shadowRoot.getElementById("estado").value
-    };
+        // 1. Validar antes de procesar
+        if (!this.validateInputs()) return;
 
-    // SOLO al crear
-    if (!this.user) {
-        data.password = this.shadowRoot.getElementById("password").value;
+        const data = {
+            nombre: this.shadowRoot.getElementById("nombre").value,
+            correo: this.shadowRoot.getElementById("correo").value,
+            rol: this.shadowRoot.getElementById("rol").value,
+            estado: this.shadowRoot.getElementById("estado").value
+        };
+
+        // SOLO al crear (password)
+        if (!this.user) {
+            data.password = this.shadowRoot.getElementById("password").value;
+        }
+
+        try {
+            if (this.user) {
+                await UserService.update(this.user.id, data);
+                this.dispatchNotify('Usuario actualizado correctamente', 'success');
+            } else {
+                await UserService.create(data);
+                this.dispatchNotify('Usuario creado exitosamente', 'success');
+            }
+
+            this.dispatchEvent(new CustomEvent("user-saved", {
+                bubbles: true,
+                composed: true
+            }));
+
+            this.resetForm();
+
+        } catch (error) {
+            console.error(error);
+            this.dispatchNotify('Ocurrió un error al guardar el usuario', 'error');
+        }
     }
-
-    if (this.user) {
-        await UserService.update(this.user.id, data);
-    } else {
-        await UserService.create(data);
-    }
-
-    this.dispatchEvent(new CustomEvent("user-saved", {
-        bubbles: true,
-        composed: true
-    }));
-
-    this.resetForm();
-}
-
 
     resetForm() {
         this.user = null;
         this.requestUpdate();
+        // Limpiar errores visuales si quedaron pendientes
+        const errorInputs = this.shadowRoot.querySelectorAll('.input-error');
+        errorInputs.forEach(input => input.classList.remove('input-error'));
+        // Limpiar formulario nativo
+        const form = this.shadowRoot.querySelector('form');
+        if (form) form.reset();
     }
 
     render() {
@@ -169,7 +242,7 @@ export class UserForm extends LitElement {
                     ${this.user ? "Editar Usuario" : "Nuevo Usuario"}
                 </div>
                 <div class="card-body-custom">
-                    <form @submit=${this.handleSubmit}>
+                    <form @submit=${this.handleSubmit} novalidate>
                         <div class="form-group">
                             <label for="nombre" class="form-label">
                                 <span>👤</span> Nombre Completo
