@@ -1,7 +1,7 @@
 import { LitElement, html, css } from "lit";
 import "./ticket-form.js";
 import "./ticket-list.js";
-import "./custom-alert.js"; // Importamos la alerta
+import "./custom-alert.js"; 
 
 export class TicketApp extends LitElement {
     static properties = {
@@ -16,13 +16,11 @@ export class TicketApp extends LitElement {
     connectedCallback() {
         super.connectedCallback();
         this.rol = this.getRolFromToken();
-        // Escuchamos el evento 'notify' que burbujea desde los hijos (form o list)
         this.addEventListener('notify', this.handleNotification);
     }
 
     disconnectedCallback() {
         super.disconnectedCallback();
-        // Limpiamos el evento al destruir el componente
         this.removeEventListener('notify', this.handleNotification);
     }
 
@@ -45,7 +43,6 @@ export class TicketApp extends LitElement {
     handleNotification(e) {
         const alertComponent = this.shadowRoot.querySelector('custom-alert');
         if (alertComponent) {
-            // Asumiendo que el evento envía { msg, type } en detail
             alertComponent.notify(e.detail.msg, e.detail.type);
         }
     }
