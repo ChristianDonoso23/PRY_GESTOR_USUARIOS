@@ -202,7 +202,7 @@ export class TicketForm extends LitElement {
     render() {
         return html`
             <div class="card-custom">
-                <h2>➕ Nuevo Ticket Administrativo</h2>
+                <h2>➕ Nuevo Ticket</h2>
                 
                 <form @submit=${this.submit} novalidate>
                     <div class="form-group">

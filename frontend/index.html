@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Soporte</title>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
     <style>
         body {
@@ -29,9 +30,8 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             display: none;
-            display: flex;              /* ← Asegura flex */
-            align-items: center;        /* ← Alinea verticalmente */
-            gap: 10px;                  /* ← Espacio entre botones */
+            align-items: center;
+            gap: 10px;
         }
 
         .nav-btn {
@@ -52,17 +52,11 @@
             box-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
         }
 
-        .logout {
-            margin-left: 20px;
-            color: #ffb3b3;
-            cursor: pointer;
-        }
-
         .logout-btn {
             background: transparent;
             border: none;
             color: #ffb3b3;
-            margin-left: auto; /* ← CLAVE: empuja el botón al extremo derecho */
+            margin-left: auto;
             padding: 10px 25px;
             font-size: 16px;
             cursor: pointer;
@@ -82,7 +76,7 @@
 
         .app-container {
             width: 100%;
-            max-width: 1400px; /* 🔑 MISMO QUE user-app */
+            max-width: 1400px;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
             padding: 20px;
@@ -90,24 +84,29 @@
             color: #333;
             min-height: 500px;
             display: none;
-            overflow-x: hidden; /* 🔑 */
+            overflow-x: hidden;
         }
-
     </style>
 </head>
+
 <body>
 
     <!-- LOGIN -->
     <login-form id="login"></login-form>
+
+    <!-- REGISTER -->
+    <register-form id="register" style="display:none"></register-form>
 
     <!-- NAV -->
     <div class="nav-container" id="nav">
         <button class="nav-btn active" id="btn-users" onclick="showModule('users')">
             <i class="bi bi-people-fill"></i> Usuarios
         </button>
+
         <button class="nav-btn" id="btn-tickets" onclick="showModule('tickets')">
             <i class="bi bi-ticket-detailed-fill"></i> Tickets
         </button>
+
         <button class="nav-btn logout-btn" onclick="logout()">
             <i class="bi bi-box-arrow-right"></i> Salir
         </button>
@@ -125,10 +124,15 @@
     </div>
 
     <script>
+        const login = document.getElementById("login");
+        const register = document.getElementById("register");
+
         const user = JSON.parse(localStorage.getItem("user"));
 
+        // Si hay sesión → mostrar app
         if (user) {
-            document.getElementById("login").style.display = "none";
+            login.style.display = "none";
+            register.style.display = "none";
             document.getElementById("nav").style.display = "flex";
             document.getElementById("app").style.display = "block";
 
@@ -138,6 +142,18 @@
                 showModule("tickets");
             }
         }
+
+        // Login → Register
+        login.addEventListener("go-register", () => {
+            login.style.display = "none";
+            register.style.display = "block";
+        });
+
+        // Register → Login
+        register.addEventListener("go-login", () => {
+            register.style.display = "none";
+            login.style.display = "block";
+        });
 
         function showModule(module) {
             document.getElementById("users-view").style.display = "none";
@@ -158,6 +174,7 @@
 
     <!-- COMPONENTS -->
     <script type="module" src="/src/components/login-form.js"></script>
+    <script type="module" src="/src/components/register-form.js"></script>
     <script type="module" src="/src/components/user-app.js"></script>
     <script type="module" src="/src/components/ticket-app.js"></script>
 

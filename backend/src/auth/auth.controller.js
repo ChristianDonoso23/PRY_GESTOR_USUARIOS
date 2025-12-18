@@ -2,37 +2,78 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { UserModel } from "../models/user.model.js";
 
-/* Función para manejar el inicio de sesión de un usuario */
+// =========================
+// LOGIN
+// =========================
 export const login = async (req, res) => {
-    /* Extrae el correo y la contraseña del cuerpo de la solicitud */
-    const { correo, password } = req.body;
+    try {
+        const { correo, password } = req.body;
 
-    /* Busca al usuario en la base de datos por su correo */
-    const user = await UserModel.getByEmail(correo);
-    if (!user) {
-        return res.status(401).json({ message: "Credenciales inválidas" });
-    }
-
-    /* Compara la contraseña proporcionada con la almacenada en la base de datos */
-    const ok = await bcrypt.compare(password, user.password);
-    if (!ok) {
-        return res.status(401).json({ message: "Credenciales inválidas" });
-    }
-
-    /* Genera un token JWT con el id y rol del usuario */
-    const token = jwt.sign(
-        { id: user.id, rol: user.rol },
-        process.env.JWT_SECRET,
-        { expiresIn: "8h" }
-    );
-
-    /* Devuelve el token y la información del usuario */
-    res.json({
-        token,
-        user: {
-            id: user.id,
-            nombre: user.nombre,
-            rol: user.rol
+        if (!correo || !password) {
+            return res.status(400).json({ message: "Datos incompletos" });
         }
-    });
+
+        const user = await UserModel.getByEmail(correo);
+        if (!user) {
+            return res.status(401).json({ message: "Credenciales inválidas" });
+        }
+
+        const ok = await bcrypt.compare(password, user.password);
+        if (!ok) {
+            return res.status(401).json({ message: "Credenciales inválidas" });
+        }
+
+        const token = jwt.sign(
+            { id: user.id, rol: user.rol },
+            process.env.JWT_SECRET,
+            { expiresIn: "8h" }
+        );
+
+        res.json({
+            token,
+            user: {
+                id: user.id,
+                nombre: user.nombre,
+                rol: user.rol
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error del servidor" });
+    }
+};
+
+// =========================
+// REGISTER (ROL USUARIO)
+// =========================
+export const register = async (req, res) => {
+    try {
+        const { nombre, correo, password } = req.body;
+
+        if (!nombre || !correo || !password) {
+            return res.status(400).json({ message: "Datos incompletos" });
+        }
+
+        const existe = await UserModel.getByEmail(correo);
+        if (existe) {
+            return res.status(409).json({ message: "Correo ya registrado" });
+        }
+
+        const hash = await bcrypt.hash(password, 10);
+
+        await UserModel.createFromRegister({
+            nombre,
+            correo,
+            password: hash
+        });
+
+        res.status(201).json({
+            message: "Usuario registrado correctamente"
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error del servidor" });
+    }
 };

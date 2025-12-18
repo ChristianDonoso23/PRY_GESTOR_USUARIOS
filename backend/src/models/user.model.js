@@ -1,6 +1,10 @@
 import { pool } from "../config/db.js";
 
 export const UserModel = {
+
+    // =========================
+    // LISTAR USUARIOS
+    // =========================
     getAll: async () => {
         const [rows] = await pool.query(
             "SELECT id, nombre, correo, rol, estado, fecha_creacion FROM usuarios"
@@ -18,12 +22,28 @@ export const UserModel = {
 
     getByEmail: async (correo) => {
         const [rows] = await pool.query(
-            "SELECT * FROM usuarios WHERE correo = ? AND estado='Activo'",
+            "SELECT * FROM usuarios WHERE correo = ? AND estado = 'Activo'",
             [correo]
         );
         return rows[0];
     },
 
+    // =========================
+    // REGISTRO PÚBLICO
+    // Rol = Usuario (por defecto)
+    // =========================
+    createFromRegister: async ({ nombre, correo, password }) => {
+        const [result] = await pool.query(
+            `INSERT INTO usuarios (nombre, correo, password)
+                VALUES (?, ?, ?)`,
+            [nombre, correo, password]
+        );
+        return result.insertId;
+    },
+
+    // =========================
+    // CRUD ADMIN
+    // =========================
     create: async (user) => {
         const { nombre, correo, password, rol } = user;
 
@@ -43,17 +63,19 @@ export const UserModel = {
     },
 
     delete: async (id) => {
-        await pool.query("DELETE FROM usuarios WHERE id=?", [id]);
+        await pool.query(
+            "DELETE FROM usuarios WHERE id=?",
+            [id]
+        );
     },
 
     getSoportesActivos: async () => {
-    const [rows] = await pool.query(
-        `SELECT id, nombre, correo
-            FROM usuarios
-            WHERE rol = 'Soporte' AND estado = 'Activo'
-            ORDER BY nombre`
-    );
-    return rows;
-},
-
+        const [rows] = await pool.query(
+            `SELECT id, nombre, correo
+                FROM usuarios
+                WHERE rol = 'Soporte' AND estado = 'Activo'
+                ORDER BY nombre`
+        );
+        return rows;
+    }
 };
