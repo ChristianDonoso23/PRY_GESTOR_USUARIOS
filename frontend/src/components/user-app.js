@@ -1,3 +1,4 @@
+// user-app.js
 import { LitElement, html, css } from "lit";
 import "./user-form.js";
 import "./user-list.js";
@@ -10,14 +11,19 @@ export class UserApp extends LitElement {
     static styles = css`
         :host {
             display: block;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem;
         }
 
+
         .main-header {
-            background: linear-gradient(135deg, #123499, #0d2472);
+            background: linear-gradient(135deg, #1b263b 0%, #415a77 100%);
             color: white;
-            padding: 2rem;
-            border-radius: 15px;
+            padding: 2.5rem 2rem;
+            border-radius: 20px;
             margin-bottom: 2rem;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
@@ -25,24 +31,59 @@ export class UserApp extends LitElement {
 
         .main-header h1 {
             font-weight: 700;
-            font-size: 2rem;
+            font-size: 2.2rem;
             margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
         }
 
         .main-header p {
-            margin: 0.5rem 0 0 0;
+            margin: 0.75rem 0 0 0;
             opacity: 0.95;
+            font-size: 1.05rem;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(360px, 420px) 1fr;
+            gap: 3rem;
+            align-items: stretch;
+        }
+
+
+
+        @media (max-width: 1400px) {
+            .content-grid {
+                grid-template-columns: 420px 1fr;
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
         }
 
         @media (max-width: 768px) {
+            :host {
+                padding: 1rem;
+            }
+
+            .main-header {
+                padding: 1.5rem;
+            }
+
             .main-header h1 {
                 font-size: 1.5rem;
+                gap: 10px;
+            }
+
+            .main-header p {
+                font-size: 0.9rem;
             }
         }
     `;
@@ -62,12 +103,12 @@ export class UserApp extends LitElement {
 
     render() {
         return html`
-            <div class="container">
-                <div class="main-header">
-                    <h1>👥 Gestión de Usuarios</h1>
-                    <p>Sistema de administración y control de usuarios</p>
-                </div>
+            <div class="main-header">
+                <h1><span>👥</span> Gestión de Usuarios</h1>
+                <p>Sistema de administración y control de usuarios</p>
+            </div>
 
+            <div class="content-grid">
                 <user-form
                     .user=${this.selectedUser}
                     @user-saved=${this.handleReload}>

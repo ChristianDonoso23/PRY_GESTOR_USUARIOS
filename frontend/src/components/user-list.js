@@ -13,24 +13,26 @@ export class UserList extends LitElement {
 
         .card-custom {
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             border: none;
             overflow: hidden;
         }
 
         .card-header-custom {
-            background: linear-gradient(135deg, #123499, #0d2472);
+            background: linear-gradient(135deg, #1b263b 0%, #415a77 100%);
             color: white;
-            padding: 1.25rem 1.5rem;
-            font-weight: 600;
-            font-size: 1.1rem;
+            padding: 1.5rem 1.75rem;
+            font-weight: 700;
+            font-size: 1.15rem;
             border: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .table-responsive {
             overflow-x: auto;
-            border-radius: 0 0 15px 15px;
         }
 
         table {
@@ -40,13 +42,13 @@ export class UserList extends LitElement {
         }
 
         thead {
-            background: linear-gradient(135deg, #123499, #0d2472);
+            background: #0d1b2a;
             color: white;
         }
 
         thead th {
             border: none;
-            padding: 1rem 1.25rem;
+            padding: 1.1rem 1.5rem;
             font-weight: 600;
             font-size: 0.9rem;
             text-transform: uppercase;
@@ -59,34 +61,34 @@ export class UserList extends LitElement {
         }
 
         tbody tr {
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #e0e1dd;
         }
 
         tbody tr:hover {
-            background-color: rgba(18, 52, 153, 0.05);
-            transform: scale(1.005);
+            background-color: rgba(65, 90, 119, 0.05);
         }
 
         tbody tr:nth-child(even) {
-            background-color: rgba(59, 110, 217, 0.03);
+            background-color: rgba(224, 225, 221, 0.3);
         }
 
         tbody td {
-            padding: 1rem 1.25rem;
+            padding: 1.1rem 1.5rem;
             vertical-align: middle;
-            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.95rem;
         }
 
         tbody td.text-center {
             text-align: center;
         }
 
-        .badge-custom {
+        .badge-estado {
             display: inline-block;
-            padding: 0.5rem 1rem;
+            padding: 0.5rem 1.1rem;
             border-radius: 20px;
             font-weight: 600;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             white-space: nowrap;
         }
 
@@ -96,79 +98,84 @@ export class UserList extends LitElement {
         }
 
         .badge-inactivo {
-            background-color: #6b7280;
+            background-color: #778da9;
             color: white;
         }
 
         .badge-rol {
             display: inline-block;
-            padding: 0.4rem 0.9rem;
+            padding: 0.5rem 1rem;
             border-radius: 15px;
             font-weight: 600;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: white;
         }
 
         .badge-admin {
-            background-color: #dc2626;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
         }
 
         .badge-soporte {
-            background-color: #f59e0b;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
         }
 
         .badge-usuario {
-            background-color: #3b6ed9;
+            background: linear-gradient(135deg, #415a77, #1b263b);
         }
 
         .btn-action {
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+            padding: 0.6rem 1.1rem;
+            border-radius: 10px;
             font-size: 0.85rem;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s ease;
             border: none;
             cursor: pointer;
             margin-right: 0.5rem;
             font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .btn-edit {
-            background-color: #3b6ed9;
+            background: linear-gradient(135deg, #415a77, #1b263b);
             color: white;
         }
 
         .btn-edit:hover {
-            background-color: #2563eb;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(59, 110, 217, 0.3);
+            box-shadow: 0 4px 12px rgba(65, 90, 119, 0.4);
         }
 
         .btn-delete {
-            background-color: #dc2626;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
             color: white;
         }
 
         .btn-delete:hover {
-            background-color: #b91c1c;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+
+        .btn-action:active {
+            transform: scale(0.95);
         }
 
         strong {
             font-weight: 600;
-            color: #0d2472;
+            color: #0d1b2a;
         }
 
         @media (max-width: 768px) {
             thead th,
             tbody td {
-                padding: 0.75rem;
+                padding: 0.85rem;
                 font-size: 0.85rem;
             }
 
             .btn-action {
-                padding: 0.4rem 0.8rem;
+                padding: 0.5rem 0.9rem;
                 font-size: 0.8rem;
                 margin-right: 0.3rem;
                 margin-bottom: 0.3rem;
@@ -210,7 +217,7 @@ export class UserList extends LitElement {
         return html`
             <div class="card-custom">
                 <div class="card-header-custom">
-                    📋 Listado de Usuarios
+                    <span>📋</span> Listado de Usuarios
                 </div>
                 <div class="table-responsive">
                     <table>
@@ -234,7 +241,7 @@ export class UserList extends LitElement {
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge-custom ${user.estado === 'Activo' ? 'badge-activo' : 'badge-inactivo'}">
+                                        <span class="badge-estado ${user.estado === 'Activo' ? 'badge-activo' : 'badge-inactivo'}">
                                             ${user.estado}
                                         </span>
                                     </td>
@@ -246,12 +253,12 @@ export class UserList extends LitElement {
                                                 bubbles: true,
                                                 composed: true
                                             }))}>
-                                            ✏️ Editar
+                                            <span>✏️</span> Editar
                                         </button>
                                         <button 
                                             class="btn-action btn-delete"
                                             @click=${() => this.deleteUser(user.id)}>
-                                            🗑️ Eliminar
+                                            <span>🗑️</span> Eliminar
                                         </button>
                                     </td>
                                 </tr>
