@@ -84,7 +84,9 @@ export class LoginForm extends LitElement {
         border-radius: 14px;
         border: 2px solid #e0e1dd;
         font-size: 15px;
+        box-sizing: border-box; /* 🔑 CLAVE */
         }
+
 
         button {
         width: 100%;
