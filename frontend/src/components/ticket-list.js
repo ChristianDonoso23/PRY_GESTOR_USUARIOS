@@ -1,52 +1,46 @@
-// ticket-list.js
 import { LitElement, html, css } from "lit";
 import { TicketService } from "../services/ticket.service.js";
+import { UserService } from "../services/user.service.js";
 
 export class TicketList extends LitElement {
     static properties = {
-        tickets: { state: true }
+        tickets: { state: true },
+        soportes: { state: true },
+        asignandoId: { state: true },
+        soporteSeleccionado: { state: true },
+        cambiandoEstadoId: { state: true },
+        estadoSeleccionado: { state: true }
     };
 
     static styles = css`
         :host {
             display: block;
             width: 100%;
-            min-width: 0;
         }
 
         .card-custom {
             background: white;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,.15);
             overflow: hidden;
         }
 
         .card-header-custom {
             background: linear-gradient(135deg, #1b263b, #415a77);
             color: white;
-            padding: 1.5rem 1.75rem;
+            padding: 1.5rem;
             font-weight: 700;
-            font-size: 1.15rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .card-body-custom {
-            padding: 2rem 0;
-            padding-bottom: 2rem;
+            font-size: 1.1rem;
         }
 
         .table-wrapper {
-            width: 100%;
             overflow-x: auto;
-            padding: 0 1.75rem;
-            box-sizing: border-box;
+            padding: 1.5rem;
         }
 
         table {
             width: 100%;
+            min-width: 950px;
             border-collapse: collapse;
         }
 
@@ -55,79 +49,79 @@ export class TicketList extends LitElement {
             color: white;
         }
 
-        thead th {
-            padding: 1rem 0.75rem;
-            font-size: 0.85rem;
-            text-transform: uppercase;
+        thead th, tbody td {
+            padding: .9rem;
             white-space: nowrap;
             text-align: left;
         }
 
-        tbody td {
-            padding: 1rem 0.75rem;
-            font-size: 0.9rem;
-            white-space: nowrap;
+        tbody tr:hover {
+            background: rgba(0,0,0,.03);
         }
 
         .badge-prioridad {
-            padding: 0.45rem 0.9rem;
+            padding: .4rem .9rem;
             border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            font-size: .8rem;
             color: white;
+            font-weight: 600;
         }
 
-        .prioridad-baja { background: #778da9; }
-        .prioridad-media { background: #f59e0b; }
         .prioridad-alta { background: #dc2626; }
+        .prioridad-media { background: #f59e0b; }
+        .prioridad-baja { background: #778da9; }
 
         .badge-estado {
-            padding: 0.45rem 0.9rem;
+            padding: .4rem .9rem;
             border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            font-size: .8rem;
             color: white;
             background: #5ea073;
+            font-weight: 600;
         }
 
         .actions {
             display: flex;
-            gap: 0.5rem;
+            gap: .5rem;
+            align-items: center;
             flex-wrap: wrap;
         }
 
-        .btn-action {
-            padding: 0.55rem 0.9rem;
+        select {
+            padding: .4rem;
+            border-radius: 8px;
+            font-size: .8rem;
+        }
+
+        button {
+            padding: .5rem .9rem;
             border-radius: 10px;
-            font-size: 0.8rem;
+            font-size: .8rem;
             font-weight: 600;
             border: none;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-assign {
-            background: #f59e0b;
             color: white;
         }
 
-        .btn-estado {
-            background: #415a77;
-            color: white;
-        }
+        .btn-assign { background: #f59e0b; }
+        .btn-estado { background: #415a77; }
+        .btn-save { background: #1b263b; }
+        .btn-delete { background: #dc2626; }
     `;
 
     constructor() {
         super();
         this.tickets = [];
+        this.soportes = [];
+        this.asignandoId = null;
+        this.soporteSeleccionado = "";
+        this.cambiandoEstadoId = null;
+        this.estadoSeleccionado = "";
     }
 
     connectedCallback() {
         super.connectedCallback();
         this.load();
-        this.addEventListener("ticket-updated", () => this.load());
     }
 
     async load() {
@@ -144,61 +138,150 @@ export class TicketList extends LitElement {
         }
     }
 
-    getPrioridadClass(prioridad) {
-        return prioridad === "Alta" ? "prioridad-alta" :
-               prioridad === "Media" ? "prioridad-media" :
-               "prioridad-baja";
+    getPrioridadClass(p) {
+        return p === "Alta"
+            ? "prioridad-alta"
+            : p === "Media"
+            ? "prioridad-media"
+            : "prioridad-baja";
+    }
+
+    async iniciarAsignacion(id) {
+        this.asignandoId = id;
+        this.soportes = await UserService.getSoportes();
+        this.soporteSeleccionado = "";
+    }
+
+    async guardarAsignacion(id) {
+        if (!this.soporteSeleccionado) {
+            alert("Seleccione un soporte");
+            return;
+        }
+        await TicketService.assign(id, this.soporteSeleccionado);
+        this.asignandoId = null;
+        this.load();
+    }
+
+    iniciarCambioEstado(id, estadoActual) {
+        this.cambiandoEstadoId = id;
+        this.estadoSeleccionado = estadoActual;
+    }
+
+    async guardarEstado(id) {
+        if (!this.estadoSeleccionado) return;
+        await TicketService.updateEstado(id, this.estadoSeleccionado);
+        this.cambiandoEstadoId = null;
+        this.load();
+    }
+
+    async eliminarTicket(id) {
+        if (!confirm("¿Está seguro de eliminar este ticket?")) return;
+        await TicketService.delete(id);
+        this.load();
     }
 
     render() {
         return html`
             <div class="card-custom">
-                <div class="card-header-custom">
-                    📄 Listado de Tickets
-                </div>
+                <div class="card-header-custom">📄 Listado de Tickets</div>
 
-                <div class="card-body-custom">
-                    <div class="table-wrapper">
-                        <table>
-                            <thead>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>TÍTULO</th>
+                                <th>PRIORIDAD</th>
+                                <th>ESTADO</th>
+                                <th>CREADO POR</th>
+                                <th>ASIGNADO A</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${this.tickets.map(t => html`
                                 <tr>
-                                    <th>TÍTULO</th>
-                                    <th>PRIORIDAD</th>
-                                    <th>ESTADO</th>
-                                    <th>CREADO POR</th>
-                                    <th>ASIGNADO A</th>
-                                    <th>ACCIONES</th>
+                                    <td><strong>${t.titulo}</strong></td>
+
+                                    <td>
+                                        <span class="badge-prioridad ${this.getPrioridadClass(t.prioridad)}">
+                                            ${t.prioridad}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        ${this.cambiandoEstadoId === t.id
+                                            ? html`
+                                                <select
+                                                    @change=${e => this.estadoSeleccionado = e.target.value}>
+                                                    ${["Abierto","En Proceso","Cerrado"].map(est => html`
+                                                        <option value=${est} ?selected=${est === t.estado}>
+                                                            ${est}
+                                                        </option>
+                                                    `)}
+                                                </select>
+                                            `
+                                            : html`<span class="badge-estado">${t.estado}</span>`
+                                        }
+                                    </td>
+
+                                    <td>${t.creado_por_nombre}</td>
+                                    <td>${t.asignado_a_nombre || "—"}</td>
+
+                                    <td>
+                                        <div class="actions">
+
+                                            ${this.rol === "Admin" ? (
+                                                this.asignandoId === t.id
+                                                    ? html`
+                                                        <select
+                                                            @change=${e => this.soporteSeleccionado = e.target.value}>
+                                                            <option value="">Soporte...</option>
+                                                            ${this.soportes.map(s => html`
+                                                                <option value=${s.id}>${s.nombre}</option>
+                                                            `)}
+                                                        </select>
+                                                        <button class="btn-save"
+                                                            @click=${() => this.guardarAsignacion(t.id)}>
+                                                            Guardar
+                                                        </button>
+                                                    `
+                                                    : html`
+                                                        <button class="btn-assign"
+                                                            @click=${() => this.iniciarAsignacion(t.id)}>
+                                                            👤 Asignar
+                                                        </button>
+                                                    `
+                                            ) : ""}
+
+                                            ${(this.rol === "Admin" || this.rol === "Soporte") ? (
+                                                this.cambiandoEstadoId === t.id
+                                                    ? html`
+                                                        <button class="btn-save"
+                                                            @click=${() => this.guardarEstado(t.id)}>
+                                                            Guardar
+                                                        </button>
+                                                    `
+                                                    : html`
+                                                        <button class="btn-estado"
+                                                            @click=${() => this.iniciarCambioEstado(t.id, t.estado)}>
+                                                            🔄 Estado
+                                                        </button>
+                                                    `
+                                            ) : ""}
+
+                                            ${this.rol === "Admin" ? html`
+                                                <button class="btn-delete"
+                                                    @click=${() => this.eliminarTicket(t.id)}>
+                                                    🗑️ Eliminar
+                                                </button>
+                                            ` : ""}
+
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                ${this.tickets.map(t => html`
-                                    <tr>
-                                        <td><strong>${t.titulo}</strong></td>
-                                        <td>
-                                            <span class="badge-prioridad ${this.getPrioridadClass(t.prioridad)}">
-                                                ${t.prioridad}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge-estado">${t.estado || "Pendiente"}</span>
-                                        </td>
-                                        <td>${t.creado_por_nombre}</td>
-                                        <td>${t.asignado_a_nombre || "—"}</td>
-                                        <td>
-                                            <div class="actions">
-                                                ${this.rol === "Admin" ? html`
-                                                    <button class="btn-action btn-assign">👤 Asignar</button>
-                                                ` : ""}
-                                                ${(this.rol === "Admin" || this.rol === "Soporte") ? html`
-                                                    <button class="btn-action btn-estado">🔄 Cambiar Estado</button>
-                                                ` : ""}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                `)}
-                            </tbody>
-                        </table>
-                    </div>
+                            `)}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         `;
