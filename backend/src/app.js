@@ -9,13 +9,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-    res.send("API funcionando");
-});
+app.get("/", (req, res) => res.send("API funcionando"));
 
+app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/tickets", ticketRoutes);
-app.use("/auth", authRoutes);
-
 
 export default app;

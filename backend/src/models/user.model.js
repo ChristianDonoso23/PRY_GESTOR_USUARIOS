@@ -44,5 +44,16 @@ export const UserModel = {
 
     delete: async (id) => {
         await pool.query("DELETE FROM usuarios WHERE id=?", [id]);
-    }
+    },
+
+    getSoportesActivos: async () => {
+    const [rows] = await pool.query(
+        `SELECT id, nombre, correo
+            FROM usuarios
+            WHERE rol = 'Soporte' AND estado = 'Activo'
+            ORDER BY nombre`
+    );
+    return rows;
+},
+
 };
