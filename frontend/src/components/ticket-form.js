@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { TicketService } from "../services/ticket.service.js";
-import { UserService } from "../services/user.service.js"; 
+import { UserService } from "../services/user.service.js";
 
 export class TicketForm extends LitElement {
     static properties = {
@@ -10,7 +10,7 @@ export class TicketForm extends LitElement {
 
     static styles = css`
         :host { display: block; }
-        
+
         .card-custom {
             background: white;
             border-radius: 20px;
@@ -29,7 +29,7 @@ export class TicketForm extends LitElement {
         }
 
         .form-group { margin-bottom: 1.2rem; }
-        
+
         .form-label {
             display: block;
             font-weight: 600;
@@ -55,7 +55,6 @@ export class TicketForm extends LitElement {
             box-shadow: 0 0 0 4px rgba(65, 90, 119, 0.1);
         }
 
-        /* --- NUEVOS ESTILOS PARA VALIDACIÓN (UX) --- */
         .input-error {
             border-color: #e74c3c !important;
             box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1) !important;
@@ -69,7 +68,6 @@ export class TicketForm extends LitElement {
             75% { transform: translateX(-5px); }
             100% { transform: translateX(0); }
         }
-        /* ------------------------------------------- */
 
         textarea.form-control {
             resize: vertical;
@@ -102,54 +100,68 @@ export class TicketForm extends LitElement {
         this.loading = false;
     }
 
+    /* =========================
+       ROL DEL USUARIO (CORRECTO)
+       ========================= */
+    get rol() {
+        const user = localStorage.getItem("user");
+        if (!user) return "Usuario";
+        try {
+            return JSON.parse(user).rol;
+        } catch {
+            return "Usuario";
+        }
+    }
+
     async connectedCallback() {
         super.connectedCallback();
-        await this.loadSoportes();
+        if (this.rol === "Admin") {
+            await this.loadSoportes();
+        }
     }
 
     async loadSoportes() {
         try {
-            this.soportes = await UserService.getSoportes(); 
+            this.soportes = await UserService.getSoportes();
         } catch (error) {
-            console.error("Error cargando soportes", error);
-            // Usamos tu sistema de notificación existente
-            this.dispatchNotify('Error al cargar agentes de soporte', 'error');
+            this.dispatchNotify("Error al cargar agentes de soporte", "error");
         }
     }
 
-    // Método auxiliar para disparar notificaciones
     dispatchNotify(msg, type) {
-        this.dispatchEvent(new CustomEvent('notify', {
+        this.dispatchEvent(new CustomEvent("notify", {
             detail: { msg, type },
             bubbles: true,
             composed: true
         }));
     }
 
-    // Nueva lógica de validación visual
     validateInputs() {
-        const inputs = this.shadowRoot.querySelectorAll('[required]');
+        const inputs = this.shadowRoot.querySelectorAll("[required]");
         let isValid = true;
         let firstError = null;
 
         inputs.forEach(input => {
-            // Limpiar estado previo
-            input.classList.remove('input-error');
+            if (this.rol === "Usuario" && input.id === "asignado") return;
+
+            input.classList.remove("input-error");
 
             if (!input.value.trim()) {
-                input.classList.add('input-error');
+                input.classList.add("input-error");
                 isValid = false;
                 if (!firstError) firstError = input;
 
-                // UX: Limpiar error apenas el usuario escriba
-                input.addEventListener('input', () => {
-                    input.classList.remove('input-error');
+                input.addEventListener("input", () => {
+                    input.classList.remove("input-error");
                 }, { once: true });
             }
         });
 
         if (!isValid) {
-            this.dispatchNotify('Por favor, completa los campos obligatorios resaltados.', 'warning');
+            this.dispatchNotify(
+                "Por favor, completa los campos obligatorios resaltados.",
+                "warning"
+            );
             if (firstError) firstError.focus();
         }
 
@@ -158,72 +170,89 @@ export class TicketForm extends LitElement {
 
     async submit(e) {
         e.preventDefault();
-        
-        // 1. Validar antes de procesar
         if (!this.validateInputs()) return;
 
         this.loading = true;
 
-        const titulo = this.shadowRoot.getElementById('titulo').value;
-        const descripcion = this.shadowRoot.getElementById('descripcion').value;
-        const prioridad = this.shadowRoot.getElementById('prioridad').value;
-        const asignadoA = this.shadowRoot.getElementById('asignado').value;
+        const titulo = this.shadowRoot.getElementById("titulo").value;
+        const descripcion = this.shadowRoot.getElementById("descripcion").value;
+        const prioridad = this.shadowRoot.getElementById("prioridad").value;
+
+        const asignadoA = this.rol === "Admin"
+            ? this.shadowRoot.getElementById("asignado")?.value
+            : null;
 
         try {
             await TicketService.create({
                 titulo,
                 descripcion,
                 prioridad,
-                asignado_a: asignadoA || null
+                asignado_a: asignadoA
             });
 
-            this.dispatchNotify('Ticket creado y asignado correctamente', 'success');
-            
-            this.dispatchEvent(new CustomEvent('ticket-saved', {
+            this.dispatchNotify("Ticket creado correctamente", "success");
+
+            this.dispatchEvent(new CustomEvent("ticket-saved", {
                 bubbles: true,
                 composed: true
             }));
 
             this.resetForm();
 
-        } catch (error) {
-            this.dispatchNotify('Error al crear el ticket en el servidor', 'error');
+        } catch {
+            this.dispatchNotify("Error al crear el ticket", "error");
         } finally {
             this.loading = false;
         }
     }
 
     resetForm() {
-        this.shadowRoot.querySelector('form').reset();
-        // Asegurar que se limpien estilos de error si quedaron
-        this.shadowRoot.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+        this.shadowRoot.querySelector("form").reset();
+        this.shadowRoot
+            .querySelectorAll(".input-error")
+            .forEach(el => el.classList.remove("input-error"));
     }
 
     render() {
         return html`
             <div class="card-custom">
                 <h2>➕ Nuevo Ticket</h2>
-                
+
                 <form @submit=${this.submit} novalidate>
                     <div class="form-group">
                         <label class="form-label">Título del Incidente</label>
-                        <input id="titulo" class="form-control" required placeholder="Ej: Error en servidor de correos">
+                        <input
+                            id="titulo"
+                            class="form-control"
+                            required
+                            placeholder="Ej: Error en servidor de correos">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Descripción Detallada</label>
-                        <textarea id="descripcion" class="form-control" required placeholder="Detalle el problema..."></textarea>
+                        <textarea
+                            id="descripcion"
+                            class="form-control"
+                            required
+                            placeholder="Detalle el problema...">
+                        </textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Asignar a Agente de Soporte</label>
-                        <select id="asignado" class="form-select" required>
-                            <option value="" disabled selected>Seleccione un agente...</option>
-                            ${this.soportes.map(soporte => html`
-                                <option value="${soporte.id}">👤 ${soporte.nombre} (${soporte.correo})</option>
-                            `)}
-                        </select>
-                    </div>
+                    ${this.rol === "Admin" ? html`
+                        <div class="form-group">
+                            <label class="form-label">Asignar a Agente de Soporte</label>
+                            <select id="asignado" class="form-select" required>
+                                <option value="" disabled selected>
+                                    Seleccione un agente...
+                                </option>
+                                ${this.soportes.map(s => html`
+                                    <option value="${s.id}">
+                                        👤 ${s.nombre} (${s.correo})
+                                    </option>
+                                `)}
+                            </select>
+                        </div>
+                    ` : ""}
 
                     <div class="form-group">
                         <label class="form-label">Nivel de Prioridad</label>
@@ -235,7 +264,7 @@ export class TicketForm extends LitElement {
                     </div>
 
                     <button type="submit" class="btn-primary" ?disabled=${this.loading}>
-                        ${this.loading ? 'Guardando...' : 'Crear y Asignar Ticket'}
+                        ${this.loading ? "Guardando..." : "Crear Ticket"}
                     </button>
                 </form>
             </div>

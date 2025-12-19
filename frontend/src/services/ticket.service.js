@@ -1,13 +1,15 @@
-const API_URL = "http://localhost:3000/tickets";
+const API_URL = `${import.meta.env.VITE_API_URL}/tickets`;
 
 const authHeader = () => ({
     "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem("token")}`
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
 
 export const TicketService = {
     getAll: async () => {
-        const res = await fetch(API_URL, { headers: authHeader() });
+        const res = await fetch(API_URL, {
+            headers: authHeader()
+        });
         return res.json();
     },
 
